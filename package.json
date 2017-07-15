@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/allblue-pl/js-libs.git"
+    "url": "git+https://github.com/allblue-pl/node_js-libs.git"
   },
   "keywords": [
     "lib",
@@ -23,7 +23,7 @@
   "author": "Jakub Zolcik (AllBlue)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/allblue-pl/js-libs/issues"
+    "url": "https://github.com/allblue-pl/node_js-libs/issues"
   },
-  "homepage": "https://github.com/allblue-pl/js-libs#readme"
+  "homepage": "https://github.com/allblue-pl/node_js-libs#readme"
 }
