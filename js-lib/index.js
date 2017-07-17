@@ -1,6 +1,9 @@
 'use strict';
 
-const abFS = require('ab-fs');
+const fs = require('fs');
+const path = require('path');
+
+const WebBuilder = require('./WebBuilder');
 
 
 class JSLibs {
@@ -10,15 +13,10 @@ class JSLibs {
 
     }
 
-    build(js_lib_name, js_lib_path, build_path)
+    build(js_lib_name, js_lib_fs_path, build_fs_path, callback)
     { let self = this;
-        self._parse(js_lib_path);
-    }
-
-    _parse(dir_path)
-    { let self = this;
-        let file_paths = abFS.matcher.getFilePaths([ dir_path + '/*.js' ]);
-        console.log(file_paths);
+        let web_builder = new WebBuilder(js_lib_name, js_lib_fs_path, build_fs_path);
+        web_builder.build(callback);
     }
 
 }
