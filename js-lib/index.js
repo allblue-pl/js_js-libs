@@ -8,11 +8,6 @@ const WebBuilder = require('./WebBuilder');
 
 class JSLibs {
 
-    construct()
-    { let self = this;
-
-    }
-
     build(js_lib_name, js_lib_fs_path, build_fs_path, callback)
     { let self = this;
         let web_builder = new WebBuilder(js_lib_name, js_lib_fs_path, build_fs_path);
