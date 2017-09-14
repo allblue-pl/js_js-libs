@@ -26,8 +26,7 @@ class JSLibs
     importModule(package_name, module_path)
     { let self = this;
         if (!(package_name in self._packages)) {
-            throw new Error('Package `' + package_name +
-                    '` does not exist.');
+            throw new Error('Package `' + package_name + '` does not exist.');
         }
 
         return self._packages[package_name].importModule(module_path);
@@ -50,25 +49,24 @@ class JSLibs
 class Module
 {
 
-    get instance()
+    get instanceModule()
     { let self = this;
-        if (self._instance === null) {
+        if (self._instanceModule === null) {
             let require = new Require(self._package.jsLibs, self._package.name,
                     self._path);
-            let module = {
-                exports: null
+            self._instanceModule = {
+                exports: Module.ExportNotImplemented,
             };
 
-            self._instance = self._initFn(require.fn, module);
+            self._initFn(require.fn, self._instanceModule);
 
-            if (module.exports === null) {
+            if (self._instanceModule.exports === Module.ExportNotImplemented) {
                 throw new Error('No `exports` found in module `' +
                         self._package.name + '/' + self._path + '`.');
             }
-            self._instance = module.exports;
         }
 
-        return self._instance;
+        return self._instanceModule;
     }
 
 
@@ -78,10 +76,20 @@ class Module
         self._path = module_path;
         self._initFn = init_fn;
 
-        self._instance = null;
+        self._instanceModule = null;
     }
 
 }
+Object.defineProperties(Module, {
+
+    DoesNotExists: { value:
+    new class Module_DoesNotExist {
+
+    }()},
+
+    ExportNotImplemented: { value: {}, },
+
+});
 
 
 class Package
@@ -103,13 +111,13 @@ class Package
     importModule(module_path)
     { let self = this;
         if (module_path in self._modules)
-            return self._modules[module_path].instance;
+            return self._modules[module_path].instanceModule.exports;
 
         module_path += '/index';
         if (module_path in self._modules)
-            return self._modules[module_path].instance;
+            return self._modules[module_path].instanceModule.exports;
 
-        return null;
+        return Module.DoesNotExist;
     }
 
 }
@@ -134,13 +142,13 @@ class Require
 
             let module = js_libs.importModule(import_info.packageName,
                     import_info.modulePath);
-            if (module === null) {
+            if (module === Module.DoesNotExist) {
                 throw new Error('Module `' + import_path + '` (`' +
                         import_info.packageName + ':' + import_info.modulePath +
                         '`) does not exist.');
             }
 
-            return module
+            return module;
         };
 
         if (current_path !== null) {
