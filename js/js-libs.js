@@ -34,7 +34,14 @@ class JSLibs
 
     require(package_name)
     { let self = this;
-        return self.importModule(package_name, 'index');
+        let module = self.importModule(package_name, 'index');
+        if (module === Module.DoesNotExist) {
+            throw new Error('Module `' + package_name + '` (`' +
+                    package_name + ':' + 'index' +
+                    '`) does not exist.');
+        }
+
+        return module;
     }
 
 
