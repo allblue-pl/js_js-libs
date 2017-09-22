@@ -195,6 +195,11 @@ class Require
             module_path_array.push(import_path_array[i]);
         }
 
+        if (module_path_array.length === 0)
+            module_path_array.push('index');
+        else if (module_path_array[module_path_array.length - 1] === '')
+            module_path_array[module_path_array.length - 1] = 'index';
+
         return {
             packageName: self._packageName,
             modulePath: module_path_array.join('/'),
