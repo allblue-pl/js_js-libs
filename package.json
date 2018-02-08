@@ -25,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/allblue-pl/node_js-libs/issues"
   },
-  "homepage": "https://github.com/allblue-pl/node_js-libs#readme"
+  "homepage": "https://github.com/allblue-pl/node_js-libs#readme",
+  "dependencies": {
+    "ab-fs": "0.0.*"
+  }
 }
