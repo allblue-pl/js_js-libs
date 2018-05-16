@@ -1,4 +1,4 @@
-const jsLibs = new ((() => { 'use strict';
+const jsLibs_Class = (() => { 'use strict';
 
 
 class JSLibs
@@ -15,29 +15,34 @@ class JSLibs
         self._packages = {};
     }
 
-    exportModule(package_name, module_path, module_init_fn)
-    { let self = this;
-        if (!(package_name in self._packages))
-            self._packages[package_name] = new Package(self, package_name);
-
-        self._packages[package_name].addModule(module_path, module_init_fn);
+    exists(packageName)
+    {
+        return packageName in self._packages;
     }
 
-    importModule(package_name, module_path)
+    exportModule(packageName, modulePath, moduleInitFn)
     { let self = this;
-        if (!(package_name in self._packages)) {
-            throw new Error('Package `' + package_name + '` does not exist.');
+        if (!(packageName in self._packages))
+            self._packages[packageName] = new Package(self, packageName);
+
+        self._packages[packageName].addModule(modulePath, moduleInitFn);
+    }
+
+    importModule(packageName, modulePath)
+    { let self = this;
+        if (!(packageName in self._packages)) {
+            throw new Error('Package `' + packageName + '` does not exist.');
         }
 
-        return self._packages[package_name].importModule(module_path);
+        return self._packages[packageName].importModule(modulePath);
     }
 
-    require(package_name)
+    require(packageName)
     { let self = this;
-        let module = self.importModule(package_name, 'index');
+        let module = self.importModule(packageName, 'index');
         if (module === Module.DoesNotExist) {
-            throw new Error('Module `' + package_name + '` (`' +
-                    package_name + ':' + 'index' +
+            throw new Error('Module `' + packageName + '` (`' +
+                    packageName + ':' + 'index' +
                     '`) does not exist.');
         }
 
@@ -62,12 +67,13 @@ class Module
             let require = new Require(self._package.jsLibs, self._package.name,
                     self._path);
             self._instanceModule = {
-                exports: Module.ExportNotImplemented,
+                exports: {}, // Module.ExportNotImplemented,
             };
 
             self._initFn(require.fn, self._instanceModule);
 
             if (self._instanceModule.exports === Module.ExportNotImplemented) {
+                console.log(self._instanceModule);
                 throw new Error('No `exports` found in module `' +
                         self._package.name + '/' + self._path + '`.');
             }
@@ -77,10 +83,10 @@ class Module
     }
 
 
-    constructor(js_lib_package, module_path, init_fn)
+    constructor(js_lib_package, modulePath, init_fn)
     { let self = this;
         self._package = js_lib_package;
-        self._path = module_path;
+        self._path = modulePath;
         self._initFn = init_fn;
 
         self._instanceModule = null;
@@ -102,27 +108,27 @@ Object.defineProperties(Module, {
 class Package
 {
 
-    constructor(js_libs, package_name)
+    constructor(jsLibs, packageName)
     { let self = this;
-        self.jsLibs = js_libs;
-        self.name = package_name;
+        self.jsLibs = jsLibs;
+        self.name = packageName;
 
         self._modules = {};
     }
 
-    addModule(module_path, module_init_fn)
+    addModule(modulePath, moduleInitFn)
     { let self = this;
-        self._modules[module_path] = new Module(self, module_path, module_init_fn);
+        self._modules[modulePath] = new Module(self, modulePath, moduleInitFn);
     }
 
-    importModule(module_path)
+    importModule(modulePath)
     { let self = this;
-        if (module_path in self._modules)
-            return self._modules[module_path].instanceModule.exports;
+        if (modulePath in self._modules)
+            return self._modules[modulePath].instanceModule.exports;
 
-        module_path += '/index';
-        if (module_path in self._modules)
-            return self._modules[module_path].instanceModule.exports;
+        modulePath += '/index';
+        if (modulePath in self._modules)
+            return self._modules[modulePath].instanceModule.exports;
 
         return Module.DoesNotExist;
     }
@@ -139,15 +145,15 @@ class Require
     }
 
 
-    constructor(js_libs, package_name = null, current_path = null)
+    constructor(jsLibs, packageName = null, current_path = null)
     { let self = this;
-        self._packageName = package_name;
+        self._packageName = packageName;
         self._currentPath_Array = null;
 
         self._fn = (import_path) => {
             let import_info = self._resolveImportInfo(import_path);
 
-            let module = js_libs.importModule(import_info.packageName,
+            let module = jsLibs.importModule(import_info.packageName,
                     import_info.modulePath);
             if (module === Module.DoesNotExist) {
                 throw new Error('Module `' + import_path + '` (`' +
@@ -181,28 +187,28 @@ class Require
             throw new Error('Cannot import module outside of package.');
 
         /* Import Module */
-        let module_path_array = self._currentPath_Array.slice();
+        let modulePath_array = self._currentPath_Array.slice();
 
         for (let i = 0; i < import_path_array.length; i++) {
             if (import_path_array[i] === '.')
                 continue;
 
             if (import_path_array[i] === '..') {
-                module_path_array.pop();
+                modulePath_array.pop();
                 continue;
             }
 
-            module_path_array.push(import_path_array[i]);
+            modulePath_array.push(import_path_array[i]);
         }
 
-        if (module_path_array.length === 0)
-            module_path_array.push('index');
-        else if (module_path_array[module_path_array.length - 1] === '')
-            module_path_array[module_path_array.length - 1] = 'index';
+        if (modulePath_array.length === 0)
+            modulePath_array.push('index');
+        else if (modulePath_array[modulePath_array.length - 1] === '')
+            modulePath_array[modulePath_array.length - 1] = 'index';
 
         return {
             packageName: self._packageName,
-            modulePath: module_path_array.join('/'),
+            modulePath: modulePath_array.join('/'),
         };
     }
 
@@ -211,6 +217,7 @@ class Require
 
 return JSLibs;
 
-})())();
+})();
 
+const jsLibs = new jsLibs_Class();
 const require = (new jsLibs.Require(jsLibs)).fn;
