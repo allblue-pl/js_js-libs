@@ -70,7 +70,7 @@ class Module
                 exports: {}, // Module.ExportNotImplemented,
             };
 
-            self._initFn(require.fn, self._instanceModule);
+            self._initFn(require.fn, self._instanceModule, self._instanceModule.exports);
 
             if (self._instanceModule.exports === Module.ExportNotImplemented) {
                 console.log(self._instanceModule);
